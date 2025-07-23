@@ -279,77 +279,76 @@ class ActivitiesCachePlugin(Plugin):
         """
         for user, cache_file in self.cachefiles:
             db = sqlite3.SQLite3(cache_file.open())
-            act = db.table("Activity")
-            if act is None:
-                continue
 
-            for r in act.rows():
-                t = r["[ActivityType]"]
-                if t not in (5, 6, 10, 16):
-                    continue
+            if table := db.table("Activity"):
+                
+                for r in table.rows():
+                    t = r["[ActivityType]"]
+                    if t not in (5, 6, 10, 16):
+                        continue
 
-                lmoc = r["[LastModifiedOnClient]"]
-                if lmoc in (None, 0, "0"):
-                    continue
+                    lmoc = r["[LastModifiedOnClient]"]
+                    if lmoc in (None, 0, "0"):
+                        continue
 
-                base_action = {5: "Open", 6: "FocusEnd", 10: "ClipboardData", 16: "Clipboard"}[t]
-                is_deleted = str(r["[ActivityStatus]"]).strip() == "3"
-                raw_app_activity = r["[AppActivityId]"] or ""
-                parts = str(raw_app_activity).split("\\", 1)
-                if len(parts) > 1:
-                    guid, exe = parts
-                else:
-                    exe = _normalize_package_name(first_application(r["[AppId]"]))
-                    guid = first_application(r["[AppId]"])
+                    base_action = {5: "Open", 6: "FocusEnd", 10: "ClipboardData", 16: "Clipboard"}[t]
+                    is_deleted = str(r["[ActivityStatus]"]).strip() == "3"
+                    raw_app_activity = r["[AppActivityId]"] or ""
+                    parts = str(raw_app_activity).split("\\", 1)
+                    if len(parts) > 1:
+                        guid, exe = parts
+                    else:
+                        exe = _normalize_package_name(first_application(r["[AppId]"]))
+                        guid = first_application(r["[AppId]"])
 
-                file_name = filename_from_payload(r["[Payload]"]) if t == 5 else ""
-                clipboard_type = (r["[Group]"]) if t == 16 and r["[Group]"] else ""
+                    file_name = filename_from_payload(r["[Payload]"]) if t == 5 else ""
+                    clipboard_type = (r["[Group]"]) if t == 16 and r["[Group]"] else ""
 
-                focus_sec = None
-                if t == 6:
-                    st_val, et_val = r["[StartTime]"], r["[EndTime]"]
-                    try:
-                        if st_val and et_val and int(st_val) and int(et_val):
-                            focus_sec = int(et_val) - int(st_val)
-                    except Exception:
-                        pass
+                    focus_sec = None
+                    if t == 6:
+                        st_val, et_val = r["[StartTime]"], r["[EndTime]"]
+                        try:
+                            if st_val and et_val and int(st_val) and int(et_val):
+                                focus_sec = int(et_val) - int(st_val)
+                        except Exception:
+                            pass
 
-                yield ActivitiesCacheRecord(
-                    timestamp=mkts(r["[LastModifiedTime]"]),
-                    timestamp_type="LastModifiedTime",
-                    action=base_action,
-                    activity_type=t,
-                    is_deleted=is_deleted,
-                    focus_time_sec=focus_sec,
-                    clipboard_type=clipboard_type,
-                    file_name=file_name,
-                    executable_path=exe,
-                    raw_guid=guid,
-                    _target=self.target,
-                    _user=user,
-                    start_time=mkts(r["[StartTime]"]),
-                    end_time=mkts(r["[EndTime]"]),
-                    last_modified_time=mkts(r["[LastModifiedTime]"]),
-                    last_modified_on_client=mkts(r["[LastModifiedOnClient]"]),
-                    original_last_modified_on_client=mkts(r["[OriginalLastModifiedOnClient]"]),
-                    expiration_time=mkts(r["[ExpirationTime]"]),
-                    activity_id=r["[Id]"].hex(),
-                    app_id=r["[AppId]"],
-                    app_activity_id=raw_app_activity,
-                    group=r["[Group]"] or None,
-                    activity_status=r["[ActivityStatus]"],
-                    activity_priority=r["[Priority]"],
-                    match_id=r["[MatchId]"],
-                    etag=r["[ETag]"],
-                    is_local_only=r["[IsLocalOnly]"],
-                    created_in_cloud=r["[CreatedInCloud]"],
-                    platform_device_id=r["[PlatformDeviceId]"],
-                    package_id_hash=r["[PackageIdHash]"],
-                    payload=r["[Payload]"],
-                    original_payload=r["[OriginalPayload]"],
-                    clipboard_payload=r["[ClipboardPayload]"],
-                    source=cache_file,
-                )
+                    yield ActivitiesCacheRecord(
+                        timestamp=mkts(r["[LastModifiedTime]"]),
+                        timestamp_type="LastModifiedTime",
+                        action=base_action,
+                        activity_type=t,
+                        is_deleted=is_deleted,
+                        focus_time_sec=focus_sec,
+                        clipboard_type=clipboard_type,
+                        file_name=file_name,
+                        executable_path=exe,
+                        raw_guid=guid,
+                        _target=self.target,
+                        _user=user,
+                        start_time=mkts(r["[StartTime]"]),
+                        end_time=mkts(r["[EndTime]"]),
+                        last_modified_time=mkts(r["[LastModifiedTime]"]),
+                        last_modified_on_client=mkts(r["[LastModifiedOnClient]"]),
+                        original_last_modified_on_client=mkts(r["[OriginalLastModifiedOnClient]"]),
+                        expiration_time=mkts(r["[ExpirationTime]"]),
+                        activity_id=r["[Id]"].hex(),
+                        app_id=r["[AppId]"],
+                        app_activity_id=raw_app_activity,
+                        group=r["[Group]"] or None,
+                        activity_status=r["[ActivityStatus]"],
+                        activity_priority=r["[Priority]"],
+                        match_id=r["[MatchId]"],
+                        etag=r["[ETag]"],
+                        is_local_only=r["[IsLocalOnly]"],
+                        created_in_cloud=r["[CreatedInCloud]"],
+                        platform_device_id=r["[PlatformDeviceId]"],
+                        package_id_hash=r["[PackageIdHash]"],
+                        payload=r["[Payload]"],
+                        original_payload=r["[OriginalPayload]"],
+                        clipboard_payload=r["[ClipboardPayload]"],
+                        source=cache_file,
+                    )
 
 
 def mkts(ts: int | None) -> datetime | None:
