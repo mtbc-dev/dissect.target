@@ -21,39 +21,41 @@ def test_windows_activitiescache_10_22H2(target_win_users: Target, fs_win: Virtu
     target_win_users.add_plugin(ActivitiesCachePlugin)
 
     records = list(target_win_users.activitiescache())
-
-    assert len(records) == 22
-
-    assert records[0].start_time == datetime(2025, 3, 4, 10, 28, 20, tzinfo=timezone.utc)
-    assert not records[0].end_time
-    assert records[0].last_modified_time == datetime(2025, 3, 4, 10, 28, 20, tzinfo=timezone.utc)
-    assert records[0].last_modified_on_client == datetime(2025, 3, 4, 10, 28, 20, tzinfo=timezone.utc)
+    assert len(records) == 9
+    assert records[6].activity_type == 16
+    assert records[6].clipboard_type == "Copy"
+    assert records[2].action == "FocusEnd"
+    assert records[2].is_deleted == False
+    assert records[2].focus_time_sec == 14
+    assert records[2].executable_path == "{ThisPCDesktopFolder}\\filetest.txt"
+    assert records[3].file_name == "filetest.txt"
+    assert records[2].timestamp == datetime(2025, 7, 22, 14, 56, 23, tzinfo=timezone.utc)
+    assert records[2].start_time == datetime(2025, 7, 22, 14, 56, 9, tzinfo=timezone.utc)
+    assert records[2].end_time == datetime(2025, 7, 22, 14, 56, 23, tzinfo=timezone.utc)
+    assert records[2].last_modified_time == datetime(2025, 7, 22, 14, 56, 23, tzinfo=timezone.utc)
+    assert records[2].last_modified_on_client == datetime(2025, 7, 22, 14, 56, 23, tzinfo=timezone.utc)
     assert not records[0].original_last_modified_on_client
-    assert records[0].expiration_time == datetime(2032, 3, 2, 10, 28, 20, tzinfo=timezone.utc)
-    assert records[0].activity_id == "c3d8d9afdec8125895bcc9348387ade1"
+    assert records[2].expiration_time == datetime(2025, 8, 21, 14, 56, 23, tzinfo=timezone.utc)
+    assert records[2].activity_id == "20a63c839f571895994e4ba205856229"
     assert (
-        records[0].app_id
-        == '[{"application":"microsoft.default.default","platform":"data_boundary"},{"application":"","platform":"packageId"},{"application":"","platform":"alternateId"}]'  # noqa: E501
+        records[2].app_id
+        == '[{"application":"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\\\notepad.exe","platform":"windows_win32"},{"application":"{D65231B0-B2F1-4857-A4CE-A8E7C6EA7D27}\\\\notepad.exe","platform":"windows_win32"},{"application":"{1AC14E77-02E7-4E5D-B744-2EB1AE5198B7}\\\\notepad.exe","platform":"packageId"},{"application":"","platform":"alternateId"}]' 
     )
-    assert not records[0].enterprise_id
+    assert not records[2].enterprise_id
     assert (
         records[0].app_activity_id
-        == "default$windows.data.bluelightreduction.settings|windows.data.bluelightreduction.settings"
+        == "ECB32AF3-1440-4086-94E3-5311F97F89C4"
     )
-    assert not records[0].group_app_activity_id
-    assert records[0].group == "default$windows.data.bluelightreduction.settings"
-    assert records[0].activity_type == 11
-    assert records[0].activity_status == 1
-    assert records[0].activity_priority == 3
-    assert not records[0].match_id
-    assert records[0].etag == 1
-    assert records[0].tag == "windows.data.bluelightreduction.settings"
-    assert records[0].is_local_only
-    assert records[0].created_in_cloud == datetime(1970, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
-    assert records[0].platform_device_id == "TNlommUcFlcw1lY+F+z4Sc57ss7UZKgX9GKxBTcbSYE="
-    assert records[0].package_id_hash == "ZZzI03ZhPBD1Dfj2GvrCeHMuMjZ9FnVlYIDK+kZzTu0="
-    assert records[0].payload == "Q0IBAMoUDhUAyh4OBwDKMgDKPAAA"
-    assert not records[0].original_payload
-    assert not records[0].clipboard_payload
-    assert records[0].source == "C:\\Users\\John\\AppData\\Local\\ConnectedDevicesPlatform\\L.John\\ActivitiesCache.db"
-    assert records[0].username == "John"
+    assert records[2].activity_type == 6
+    assert records[2].activity_status == 1
+    assert records[2].activity_priority == 1
+    assert not records[2].match_id
+    assert records[2].etag == 6
+    assert records[2].is_local_only == False
+    assert records[2].platform_device_id == "Vwyqm9v6lmHzuRWh9Y5giQO0QaWDLu5Ustb9uwou4/I="
+    assert records[2].package_id_hash == "eUssiHYOx8gt4grLn60pEG2m1QnscYA3695n7jpHJwY="
+    assert records[2].payload == '{"type":"UserEngaged","reportingApp":"ShellActivityMonitor","activeDurationSeconds":14,"shellContentDescription":{"MergedGap":600,"ActivityEngagementFlags":3},"userTimezone":"Europe/Paris"}'
+    assert not records[2].original_payload
+    assert not records[2].clipboard_payload
+    assert records[2].source == "C:\\Users\\John\\AppData\\Local\\ConnectedDevicesPlatform\\L.John\\ActivitiesCache.db"
+    assert records[2].username == "John"
